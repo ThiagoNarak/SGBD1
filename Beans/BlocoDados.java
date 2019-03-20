@@ -1,12 +1,10 @@
 package Beans;
 
 import Utilitarios.ByteArrayUtils;
+import Utilitarios.ListaTabelas;
 import Utilitarios.VarStatics;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.util.ArrayList;
 
 public class BlocoDados {
@@ -27,6 +25,7 @@ public class BlocoDados {
         tuplaArrayList = new ArrayList<>();
 
     }
+
 
     public void gravarBlocoDadosMemoria(Tupla tupla) {
 
@@ -95,13 +94,13 @@ public class BlocoDados {
     }
 
 
-    public void gravarBlocoArquivo() {
+    public void gravarBlocoArquivo(String path) {
         try {
             int aux = 0;
-            RandomAccessFile raf = new RandomAccessFile(new File("arquivo"), "rw");
+            RandomAccessFile raf = new RandomAccessFile(new File(path), "rw");
             byte[] bloco = new byte[4096];
             BlocoControle blocoControle = new BlocoControle();
-            blocoControle.lerBlocoParaMemoria();
+            blocoControle.lerBlocoParaMemoria(path);
             blocoControle.criarTiposColuna();
             ByteArrayUtils.insertBytesInArray(bloco, ByteArrayUtils.intTo1Bytes(this.idConteiner), 0);
             ByteArrayUtils.insertBytesInArray(bloco, ByteArrayUtils.intTo3Bytes(this.idBloco), 1);
@@ -117,16 +116,15 @@ public class BlocoDados {
 
                 for (int j = 0; j < this.tuplaArrayList.get(i).getColuna().length; j++) {
 
-                    if (blocoControle.getTipos()[j]=='I'){
+                    if (blocoControle.getTipos()[j] == 'I') {
                         ByteArrayUtils.insertBytesInArray(bloco, ByteArrayUtils.intTo2Bytes(4), aux);
                         aux += 2;
 
                         ByteArrayUtils.insertBytesInArray(bloco, ByteArrayUtils.intTo4Bytes(Integer.parseInt(this.tuplaArrayList.get(i).getColuna()[j])), aux);
                         aux += 4;
 
-                        //TODO: VERIFICAR CORRESPONDENTE
 
-                    }else {
+                    } else {
                         ByteArrayUtils.insertBytesInArray(bloco, ByteArrayUtils.intTo2Bytes(this.tuplaArrayList.get(i).getColuna()[j].length()), aux);
                         aux += 2;
 
@@ -138,10 +136,11 @@ public class BlocoDados {
             }
             raf.seek(this.idBloco * 4096);
             raf.write(bloco);
-            blocoControle.setProximoBlocoLivre(blocoControle.getProximoBlocoLivre()+1);
-            blocoControle.criarBlocoControle();
-            System.out.println("escrevendo o bloco: "+ this.idBloco);
-            System.out.println("com "+ tuplaArrayList.size()+" linhas");
+            gerarRowId(blocoControle, this);
+            blocoControle.setProximoBlocoLivre(blocoControle.getProximoBlocoLivre() + 1);
+            blocoControle.criarBlocoControle(path);
+            System.out.println("escrevendo o bloco: " + this.idBloco);
+            System.out.println("com " + tuplaArrayList.size() + " linhas");
             VarStatics.totalLinhas += tuplaArrayList.size();
 
 
@@ -152,5 +151,52 @@ public class BlocoDados {
         }
     }
 
+    public void gerarRowId(BlocoControle bc, BlocoDados bd) {
 
+        try {
+            FileWriter fw = new FileWriter("tableRowIds", true);
+            for (int i = 0; i < bd.tuplaArrayList.size(); i++) {
+                fw.write(bc.getIdConteiner() + "|" + bd.idBloco + "|" + bd.tuplaArrayList.get(i).getIndiceLinha() + "\n");
+            }
+
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void lerBlocoParaMemoria() {
+        BlocoDados blocoDados = new BlocoDados(idConteiner, idBloco);
+        BlocoControle blocoControle = new BlocoControle();
+        try {
+            blocoControle.lerBlocoParaMemoria(ListaTabelas.pegarTabelas().get(idConteiner));
+            RandomAccessFile raf = new RandomAccessFile(new File(ListaTabelas.pegarTabelas().get(idConteiner)), "rw");
+            byte bytes[] = new byte[4096];
+            raf.seek(4096 * idBloco);
+            raf.readFully(bytes);
+            for (int i = 0; i < ByteArrayUtils.byteArrayToInt(ByteArrayUtils.subArray(bytes, 5, 2)) / 2; i++) {
+                String linha = "";
+                int tamanho = 4;
+                int indice = ByteArrayUtils.byteArrayToInt(ByteArrayUtils.subArray(bytes, 9 + (i * 2), 2));
+                for (int j = 0; j < blocoControle.getTipos().length; j++) {
+                    //CHECK VERIFICAR ESTE PROCESSO URGENTE
+//                    linha = ByteArrayUtils.byteArrayToInt(bytes,indice+4+2+(2*j),ByteArrayUtils.subArray(bytes,indice+4+(2*j)))
+                    if (blocoControle.getTipos()[j] == 'I') {
+//                        linha = linha+"|"+By
+                    } else {
+
+                    }
+                }
+            }
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 }

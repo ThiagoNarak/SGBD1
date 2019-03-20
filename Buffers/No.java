@@ -1,4 +1,6 @@
-package Beans;
+package Buffers;
+
+import Beans.BlocoDados;
 
 public class No {
 

@@ -8,10 +8,9 @@ import java.util.Arrays;
 
 public class Teste {
     public static void main(String[] args) throws IOException {
-gerarBytesToTxt();
+//gerarBytesToTxt("tabela2");
+        imprimirHeaderDados();
 
-
-//
 
 //        regexTeste();
 //        imprimirLinhas();
@@ -46,17 +45,17 @@ gerarBytesToTxt();
         }
     }
 
-    public static void gerarBytesToTxt() {
+    public static void gerarBytesToTxt(String path) {
         try {
-            RandomAccessFile raf = new RandomAccessFile("arquivo", "r");
+            RandomAccessFile raf = new RandomAccessFile("tabela2", "r");
             BlocoControle blocoControle = new BlocoControle();
-            blocoControle.lerBlocoParaMemoria();
+            blocoControle.lerBlocoParaMemoria("tabela2");
             for (int i = 0; i < blocoControle.getProximoBlocoLivre(); i++) {
-                byte [] bytes = testeEscritaArquivoDados(i+1);
-                int numeroDeLinhas = ByteArrayUtils.byteArrayToInt(ByteArrayUtils.subArray(bytes, 5, 2))/2;
-                System.out.println("blocoAtual "+ (i+1));
+                byte[] bytes = testeEscritaArquivoDados(path, i + 1);
+                int numeroDeLinhas = ByteArrayUtils.byteArrayToInt(ByteArrayUtils.subArray(bytes, 5, 2)) / 2;
+                System.out.println("blocoAtual " + (i + 1));
                 for (int j = 1; j <= numeroDeLinhas; j++) {
-                    imprimir1LinhaEspecificaDoBloco(bytes,j);
+                    imprimir1LinhaEspecificaDoBloco(bytes, j);
                 }
             }
 
@@ -98,37 +97,19 @@ gerarBytesToTxt();
 //        System.out.println("Valor da coluna 5: "+ coluna5);
 //        System.out.println("tamanhoColuna6: "+tamanhoColuna6);
 //        System.out.println("Valor da coluna 6: "+ coluna6);
-        System.out.println(coluna1 + " | " + coluna2 + " | " + coluna3 + " | " + coluna4 + " | " + coluna5 + " | " + coluna6);
-        try {
-            FileWriter fw = new FileWriter("teste",true);
-            fw.write(coluna1 + " | " + coluna2 + " | " + coluna3 + " | " + coluna4 + " | " + coluna5 + " | " + coluna6+"\n");
-        fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        System.out.println(coluna1 + " | " + coluna2 + " | " + coluna3 + " | " + coluna4 + " | " + coluna5 + " | " + coluna6);
 
-    }
-
-    public static void imprimirLinhasBlocoDados(byte[] bytes) {
-
-
-//        System.out.println("id Conteiner: " + bytes[0]);
-//        System.out.println("id bloco: " + ByteArrayUtils.byteArrayToInt(ByteArrayUtils.subArray(bytes, 1, 3)));
-//        System.out.println("tipo bloco: " + bytes[4]);
-//        System.out.println("tamanho tuple directory: " + ByteArrayUtils.byteArrayToInt(ByteArrayUtils.subArray(bytes, 5, 2)));
-//        int tamanho = ByteArrayUtils.byteArrayToInt(ByteArrayUtils.subArray(bytes, 7, 2));
-//        System.out.println("endereço ultimo byte livre: " + ByteArrayUtils.byteArrayToInt(ByteArrayUtils.subArray(bytes, 7, 2)));
-//
-//
-//        for (int i = 0; i < tamanho; i++) {
-//
-//            int aux = ByteArrayUtils.byteArrayToInt(ByteArrayUtils.subArray(bytes, 9 + (i * 2), 2));
-//            System.out.println("posicao da linha " + i + 1 + " é " + aux);
-//            System.out.println(ByteArrayUtils.byteArrayToString(ByteArrayUtils.subArray(bytes, aux , ByteArrayUtils.byteArrayToInt(ByteArrayUtils.subArray(bytes, aux, 4)))));
-//
+//        try {
+//            FileWriter fw = new FileWriter("tabela2teste",true);
+//            fw.write(coluna1 + " | " + coluna2 + " | " + coluna3 + " | " + coluna4 + " | " + coluna5 + " | " + coluna6+"\n");
+//        fw.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
 //        }
+        System.out.println(coluna1 + " " + coluna2 + " " + coluna3 + " " + coluna4 + " " + coluna5 + " " + coluna6);
 
     }
+
 
     public static void inverter(int vetor[]) {
         int cont = vetor.length - 1;
@@ -139,11 +120,11 @@ gerarBytesToTxt();
         }
     }
 
-    public static byte[] testeEscritaArquivoDados(int i) {
+    public static byte[] testeEscritaArquivoDados(String path, int i) {
         byte[] bytes = new byte[4096];
         try {
-            RandomAccessFile raf = new RandomAccessFile(new File("arquivo"), "rw");
-            raf.seek(4096*i);
+            RandomAccessFile raf = new RandomAccessFile(new File(path), "rw");
+            raf.seek(4096 * i);
             raf.readFully(bytes);
 
         } catch (FileNotFoundException e) {
@@ -206,5 +187,22 @@ gerarBytesToTxt();
         System.out.println(Utilitarios.ByteArrayUtils.byteArrayToInt(proximoBlocoLivre));
         System.out.println(Utilitarios.ByteArrayUtils.byteArrayToInt(tamanhoDescritor));
         System.out.println(Utilitarios.ByteArrayUtils.byteArrayToString(descritor));
+    }
+
+    public static void imprimirHeaderDados() {
+
+        try {
+            RandomAccessFile raf = new RandomAccessFile("tabela1", "rw");
+            byte[] bytes = new byte[4096];
+            raf.seek(4096);
+            raf.readFully(bytes);
+
+            System.out.println(ByteArrayUtils.byteArrayToInt(ByteArrayUtils.subArray(bytes, 5, 2)));
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

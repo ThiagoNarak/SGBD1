@@ -101,9 +101,9 @@ public class BlocoControle {
         }
     }
 
-    public void criarBlocoControle() {
+    public void criarBlocoControle(String path) {
         try {
-            RandomAccessFile tabela = new RandomAccessFile(new File("arquivo"), "rw");
+            RandomAccessFile tabela = new RandomAccessFile(new File(path), "rw");
             tabela.seek(0);
             tabela.write(new byte[4096]);
             tabela.seek(0);
@@ -138,10 +138,10 @@ public class BlocoControle {
         this.tipos = tipos;
     }
 
-    public void lerBlocoParaMemoria() {
+    public void lerBlocoParaMemoria(String path) {
         byte []  bytes = new byte[4096];
         try {
-            RandomAccessFile raf = new RandomAccessFile("arquivo","r");
+            RandomAccessFile raf = new RandomAccessFile(path,"r");
             raf.seek(0);
             raf.readFully(bytes);
             this.idConteiner = ByteArrayUtils.byteArrayToInt(ByteArrayUtils.subArray(bytes,0,1));
